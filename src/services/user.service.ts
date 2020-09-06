@@ -4,6 +4,7 @@ import { Repository } from 'typeorm';
 import { User } from 'src/entities/user.entity';
 import { CreateUserDto } from 'src/dtos/create-user-dto';
 import { PatchUserDto } from 'src/dtos/patch-user-dto';
+import { UpdateUserDto } from 'src/dtos/update-user-dto';
 
 @Injectable()
 export class UsersService {
@@ -23,8 +24,6 @@ export class UsersService {
   }
 
   // get by filters
-  // update
-  // repository method is save, it assumes the dto has an id and updates the matching entity
 
   public async create(user: CreateUserDto): Promise<User> {
     // TODO
@@ -47,5 +46,18 @@ export class UsersService {
   public async patch(id: number, user: PatchUserDto): Promise<number> {
     const result = await this.usersRepository.update(id, user);
     return result.affected;
+  }
+
+  public async update(id: number, user: UpdateUserDto) {
+    // TODO
+    // service validations
+    const newUser = new User();
+    newUser.id = id;
+    newUser.firstName = user.firstName;
+    newUser.lastName = user.lastName;
+    newUser.email = user.email;
+    newUser.phoneNumber = user.phoneNumber;
+    const result = await this.usersRepository.save(newUser);
+    return result;
   }
 }
