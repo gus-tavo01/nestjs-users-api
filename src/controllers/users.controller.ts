@@ -1,11 +1,13 @@
 import {
   Controller,
-  Get,
   Param,
+  Query,
   Body,
-  Post,
   Res,
   HttpStatus,
+  Get,
+  Post,
+  Put,
   Delete,
   Patch,
 } from '@nestjs/common';
@@ -19,7 +21,11 @@ import { PatchUserDto } from 'src/dtos/patch-user-dto';
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
-  // @Get by filters
+  @Get()
+  public async getMany(@Query() query, @Res() res: Response) {
+    console.log(query);
+    return res.status(HttpStatus.OK).json({ ...query });
+  }
 
   @Get('/:id')
   public async get(@Param() params, @Res() res: Response) {
@@ -39,7 +45,42 @@ export class UsersController {
     return res;
   }
 
-  // @Put
+  @Put('/:id')
+  public async update(
+    @Param() params,
+    @Body() userRequest,
+    @Res() res: Response,
+  ) {
+    try {
+      const userId = Number(params.id);
+      const foundUser = await this.usersService.getById(userId);
+
+      if (!foundUser) {
+        res
+          .status(HttpStatus.NOT_FOUND)
+          .json({ result: null, statusCode: HttpStatus.NOT_FOUND });
+        return res;
+      }
+
+      const updateUserResponse = await this.usersService.update(
+        userId,
+        userRequest,
+      );
+      // TODO
+      // map service response into DTO
+      res
+        .status(HttpStatus.OK)
+        .json({ result: updateUserResponse, statusCode: HttpStatus.OK });
+      return res;
+    } catch (error) {
+      res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
+        result: null,
+        statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
+        error,
+      });
+      return res;
+    }
+  }
 
   @Post()
   public async create(
